@@ -325,7 +325,7 @@ class _ServerSettingsServer(BaseModel):
                 f'ポート {port} は他のプロセスで使われているため、KonomiTV を起動できません。\n'
                 f'重複して KonomiTV を起動していないか、他のソフトでポート {port} を使っていないかを確認してください。'
             )
-        if (port + 10) in used_ports:
+        if info.context.get('akebi_exists') and (port + 10) in used_ports:
             raise ValueError(
                 f'ポート {port + 10} ({port} + 10) は他のプロセスで使われているため、KonomiTV を起動できません。\n'
                 f'重複して KonomiTV を起動していないか、他のソフトでポート {port + 10} を使っていないかを確認してください。'
@@ -361,7 +361,7 @@ _CONFIG_YAML_PATH = BASE_DIR.parent / 'config.yaml'
 _DOCKER_PATH_PREFIX = '/host-rootfs'
 
 
-def LoadConfig(bypass_validation: bool = False) -> ServerSettings:
+def LoadConfig(bypass_validation: bool = False, akebi_exists: bool = False) -> ServerSettings:
     """
     config.yaml からサーバー設定データのロードとバリデーションを行い、グローバル変数に格納する
     基本 KonomiTV サーバー起動時に一度だけ呼び出されるが、自動リロードモードやマルチプロセス実行時にも呼び出される
@@ -369,6 +369,7 @@ def LoadConfig(bypass_validation: bool = False) -> ServerSettings:
 
     Args:
         bypass_validation (bool): バリデーションをスキップするかどうか
+        akebi_exists (bool): 環境に Akebi HTTPS Server が存在するかどうか
 
     Raises:
         SystemExit: 設定ファイルが配置されていなかったり、設定内容が不正な場合はサーバーを起動できないため、プロセスを終了する
@@ -460,7 +461,7 @@ def LoadConfig(bypass_validation: bool = False) -> ServerSettings:
     # サーバー設定のバリデーションを実行
     if bypass_validation is False:
         try:
-            _CONFIG = ServerSettings.model_validate(config_dict, context={'bypass_validation': False})
+            _CONFIG = ServerSettings.model_validate(config_dict, context={'bypass_validation': False, 'akebi_exists': akebi_exists})
             logging.debug('Server settings loaded.')
         except ValidationError as error:
 
@@ -481,7 +482,7 @@ def LoadConfig(bypass_validation: bool = False) -> ServerSettings:
             logging.error(error)
             sys.exit(1)
     else:
-        _CONFIG = ServerSettings.model_validate(config_dict, context={'bypass_validation': True})
+        _CONFIG = ServerSettings.model_validate(config_dict, context={'bypass_validation': True, 'akebi_exists': akebi_exists})
         # logging.debug('Server settings loaded (bypassed validation).')
 
     return _CONFIG
