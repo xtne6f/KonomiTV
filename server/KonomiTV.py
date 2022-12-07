@@ -37,6 +37,7 @@ from app.constants import (
     LIBRARY_PATH,
     LOGGING_CONFIG,
     RESTART_REQUIRED_LOCK_PATH,
+    STATIC_DIR,
     VERSION,
 )
 
@@ -56,7 +57,12 @@ def version(value: bool):
 def main(
     reload: bool = typer.Option(False, '--reload', help='Start Uvicorn in auto-reload mode. (Linux only)'),
     version: bool = typer.Option(None, '--version', callback=version, is_eager=True, help='Show version information.'),
+    delaysec: int = typer.Option(0, '--delaysec', help='Delay seconds to start.'),
+    show_notifyicon: bool = typer.Option(False, '--notifyicon', help='Show taskbar notifyicon.')
 ):
+
+    if delaysec > 0:
+        time.sleep(delaysec)
 
     # 前回のログをすべて削除する
     try:
@@ -202,6 +208,25 @@ def main(
     # Uvicorn のサーバーインスタンスを初期化
     server = uvicorn.Server(server_config)
 
+    # 通知領域にアイコンを作成
+    notifyicon = None
+    if show_notifyicon and sys.platform == 'win32':
+        from app.utils.NotifyIcon import NotifyIcon
+
+        index_uri = f'https://127-0-0-1.local.konomi.tv:{CONFIG.server.port}/' if akebi_exists else f'http://127.0.0.1:{CONFIG.server.port}/'
+        notifyicon = NotifyIcon(
+            str(STATIC_DIR / 'KonomiTV-Notify.ico'),
+            'KonomiTV - ' + index_uri,
+            lambda: NotifyIcon.shellExecuteOpen(index_uri),
+            {
+                'サーバーログ': lambda: NotifyIcon.shellExecuteOpen(str(KONOMITV_SERVER_LOG_PATH)),
+                'アクセスログ': lambda: NotifyIcon.shellExecuteOpen(str(KONOMITV_ACCESS_LOG_PATH)),
+                'Akebi のログ': lambda: NotifyIcon.shellExecuteOpen(str(AKEBI_LOG_PATH)),
+                '---': None,
+                '終了': lambda: NotifyIcon.generateConsoleCtrlCEvent()
+            }
+        )
+
     # Linux では Uvloop をイベントループとして利用する
     # Windows では Winloop をイベントループとして利用する予定だったが、2025年3月時点では
     # キャプチャ保存時 (?) に稀にプロセスごと無言で落ちる問題があるため、当面は通常の asyncio (ProactorEventLoop) を利用する
@@ -259,6 +284,10 @@ def main(
         ## os.execv() は戻らないので、事前にロックファイルを削除しておく
         RESTART_REQUIRED_LOCK_PATH.unlink()
         os.execv(sys.executable, [sys.executable, *sys.argv])
+
+    # 通知領域のアイコンを破棄
+    if notifyicon:
+        notifyicon.close()
 
 
 if __name__ == '__main__':
