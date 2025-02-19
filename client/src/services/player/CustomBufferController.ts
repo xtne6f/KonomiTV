@@ -137,7 +137,15 @@ class CustomBufferController extends BufferController {
             // URL のクエリパラメータを解析し、cache_key を更新または追加
             // セッション ID を生成 (セッション ID は UUID の - で区切って一番左側のみを使う)
             const url = new URL(hls.url!);
-            url.searchParams.set('cache_key', crypto.randomUUID().split('-')[0]);
+            let cache_key;
+            try {
+                cache_key = crypto.randomUUID().split('-')[0];
+            } catch {
+                // 暗号論的な強度は必須ではないのでフォールバックを用意する
+                // フォールバックであることが分かりやすいように先頭は '00' とする
+                cache_key = Math.floor(Math.random() * 0x1000000).toString(16).padStart(8, '0');
+            }
+            url.searchParams.set('cache_key', cache_key);
             hls.trigger(Hls.Events.MANIFEST_LOADING, {
                 url: url.toString()
             });

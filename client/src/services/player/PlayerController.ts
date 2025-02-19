@@ -375,8 +375,15 @@ class PlayerController {
                     const streaming_api_base_url = `${Utils.api_base_url}/streams/video/${player_store.recorded_program.id}`;
                     // 画質リストを作成
                     for (const quality_name of VIDEO_STREAMING_QUALITIES) {
-                        // 画質ごとに異なるセッション ID を生成 (セッション ID は UUID の - で区切って一番左側のみを使う)
-                        const session_id = crypto.randomUUID().split('-')[0];
+                        let session_id;
+                        try {
+                            // 画質ごとに異なるセッション ID を生成 (セッション ID は UUID の - で区切って一番左側のみを使う)
+                            session_id = crypto.randomUUID().split('-')[0];
+                        } catch {
+                            // 暗号論的な強度は必須ではないのでフォールバックを用意する
+                            // フォールバックであることが分かりやすいように先頭は '00' とする
+                            session_id = Math.floor(Math.random() * 0x1000000).toString(16).padStart(8, '0');
+                        }
                         // 画質設定を追加
                         qualities.push({
                             // 1080p-60fps のみ、見栄えの観点から表示上 "1080p (60fps)" と表示する
