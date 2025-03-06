@@ -155,7 +155,7 @@ async def BackgroundAnalysisAPI():
 
                 # キーフレーム情報が未解析の場合、タスクに追加
                 if not db_recorded_video.has_key_frames:
-                    tasks.append(KeyFrameAnalyzer(file_path).analyze())
+                    tasks.append(KeyFrameAnalyzer(file_path, db_recorded_video.container_format).analyze())
 
                 # サムネイルが未生成の場合、タスクに追加
                 # どちらか片方だけがないパターンも考えられるので、その場合もサムネイル生成を実行する

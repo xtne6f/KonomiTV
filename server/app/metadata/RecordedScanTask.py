@@ -52,7 +52,7 @@ class RecordedScanTask:
     __instance: ClassVar[RecordedScanTask | None] = None
 
     # スキャン対象の拡張子
-    SCAN_TARGET_EXTENSIONS: ClassVar[list[str]] = ['.ts', '.m2t', '.m2ts', '.mts']
+    SCAN_TARGET_EXTENSIONS: ClassVar[list[str]] = ['.ts', '.m2t', '.m2ts', '.mts', '.mp4']
 
     # 録画中ファイルの更新イベントを間引く間隔 (ログ出力用) (秒)
     UPDATE_THROTTLE_SECONDS: ClassVar[int] = 30
@@ -211,7 +211,7 @@ class RecordedScanTask:
                     # Mac の metadata ファイルをスキップ
                     if file_path.name.startswith('._'):
                         continue
-                    # TS ファイル以外をスキップ
+                    # 対象拡張子のファイル以外をスキップ
                     if file_path.suffix.lower() not in self.SCAN_TARGET_EXTENSIONS:
                         continue
                     # 録画ファイルが確実に存在することを確認する
@@ -546,7 +546,7 @@ class RecordedScanTask:
                 async with DriveIOLimiter.getSemaphore(file_path):
                     await asyncio.gather(
                         # 録画ファイルのキーフレーム情報を解析し DB に保存
-                        KeyFrameAnalyzer(file_path).analyze(),
+                        KeyFrameAnalyzer(file_path, recorded_program.recorded_video.container_format).analyze(),
                         # シークバー用サムネイルとリスト表示用の代表サムネイルの両方を生成
                         ## skip_tile_if_exists=True を指定し、同一内容のファイルが複数ある場合などに
                         ## 既に生成されている時間のかかるシークバー用サムネイルを使い回し、処理時間短縮を図る
@@ -589,7 +589,7 @@ class RecordedScanTask:
                     # Mac の metadata ファイルをスキップ
                     if file_path.name.startswith('._'):
                         continue
-                    # TS ファイル以外は無視
+                    # 対象拡張子のファイル以外は無視
                     if file_path.suffix.lower() not in self.SCAN_TARGET_EXTENSIONS:
                         continue
 
