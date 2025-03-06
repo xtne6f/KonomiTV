@@ -38,6 +38,8 @@ tsreadex_src_uri='https://github.com/xtne6f/tsreadex/archive/eddc8bca0de99627d38
 
 psisiarc_src_uri='https://github.com/xtne6f/psisiarc/archive/6593a0f63aedaaecfac7682b51e267874a8ec549.tar.gz'
 
+psisimux_src_uri='https://github.com/xtne6f/psisimux/archive/1e655cd51dd20a77ce5ecc8fa837dbe20c8fe530.tar.gz'
+
 pre_required_commands='curl sha256sum make g++ unzip'
 
 echo "Checking for pre-required commands ( $pre_required_commands )..."
@@ -215,6 +217,21 @@ else
     cp License.txt Readme.txt ..
     cd ..
     rm -rf psisiarc-*
+    cd ..
+    echo 'Done.'
+fi
+
+if [ -e psisimux ]; then
+    echo 'psisimux already exists. skipped.'
+else
+    echo 'Preparing psisimux...'
+    mkdir psisimux && cd psisimux || exit
+    curl -L "$psisimux_src_uri" | tar xzf -
+    cd psisimux-* && make || exit
+    cp psisimux ../psisimux.elf
+    cp License.txt Readme.txt ..
+    cd ..
+    rm -rf psisimux-*
     cd ..
     echo 'Done.'
 fi

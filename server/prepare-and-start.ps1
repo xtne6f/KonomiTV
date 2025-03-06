@@ -27,6 +27,9 @@ $tsreadexSHA256 = "472897e084dad6146a4ea327fb9267dd09775d3bc68248f676249f1de08c7
 $psisiarcZipUri = "https://github.com/xtne6f/psisiarc/releases/download/master-230324/psisiarc-master-230324.zip"
 $psisiarcSHA256 = "9e9fb304383ebb35fcfc9679182509e4069535e97a809f343bf0f6db59412d0b"
 
+$psisimuxZipUri = "https://github.com/xtne6f/psisimux/releases/download/master-240131/psisimux-master-240131.zip"
+$psisimuxSHA256 = "f390228e22fc9fc9b458226d28819dcce68e1e6af3c7116cbab4484d7ecc8834"
+
 # 7z.exe のあるフォルダを PATH に追加
 $Env:Path += ";C:\Program Files\7-Zip;C:\Program Files (x86)\7-Zip"
 
@@ -156,6 +159,19 @@ if (Test-Path psisiarc) {
         throw "Hash error."
     }
     7z.exe e -opsisiarc dltmp.zip Readme.txt x86/psisiarc.exe
+    rm dltmp.zip
+    "Done."
+}
+
+if (Test-Path psisimux) {
+    "psisimux already exists. skipped."
+} else {
+    "Preparing psisimux..."
+    Invoke-WebRequest $psisimuxZipUri -OutFile dltmp.zip
+    if ($psisimuxSHA256 -and ((Get-FileHash dltmp.zip -Algorithm SHA256).Hash -ne $psisimuxSHA256)) {
+        throw "Hash error."
+    }
+    7z.exe e -opsisimux dltmp.zip Readme.txt x86/psisimux.exe
     rm dltmp.zip
     "Done."
 }
