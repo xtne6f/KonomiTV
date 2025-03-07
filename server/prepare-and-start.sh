@@ -240,8 +240,4 @@ cd ..
 
 ./thirdparty/Python/bin/python -m poetry env use "`readlink -f ./thirdparty/Python/bin`/python"
 ./thirdparty/Python/bin/python -m poetry install --only main --no-root
-
-echo '*** If stops here, comment out the `python -m poetry run aerich upgrade` command in the script. ***'
-./thirdparty/Python/bin/python -m poetry run aerich upgrade
-
 ./thirdparty/Python/bin/python -m poetry run python KonomiTV.py
