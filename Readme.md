@@ -1,4 +1,34 @@
 
+### ※このフォークについての注意
+
+- このフォークの master ブランチはデバッグの便利のために個人的な変更を行うものです。**このブランチだけで生じた不具合などを原作者に報告するのは控えてください。**
+  - [Akebi](https://github.com/tsukumijima/Akebi) で述べられているように、最近のブラウザは「安全なコンテキスト」以外での制限が増える傾向にあります。
+    このブランチの導入方法では HTTPS 通信を必ずしも求めないため、原作者の想定しない動作をする可能性は十分にあります。
+    - 例えば「キャプチャをクリップボードにコピーする」は「安全なコンテキスト」が必要です。
+- このブランチはインストーラーによる導入を想定していません。
+  - 個人的に Windows を「管理者ユーザー」として使っているため、ユーザー権限のサービスプロセスは UAC 保護のない管理者権限そのものとなり、インストーラーによる導入がためらわれるためです。
+  - 設定ファイル "config.yaml" は "config.example.yaml" をコピーして各自で作成してください。
+    - 最低限 `video.recorded_folders` と `capture.upload_folders` キーの編集は必要になると思います。
+  - サードパーティーライブラリの準備および起動を自動化する簡単な PowerShell またはシェルスクリプトを "server/prepare-and-start.{ps1|sh}" に用意しています。
+    - Windows (prepare-and-start.ps1) では [7-Zip](https://www.7-zip.org/) が必要です。
+    - Linux (prepare-and-start.sh) では ffmpeg や {QSV|NV|VCE}EncC については環境にあるコマンドのシンボリックリンクを作るだけです。コマンド自体は個別に導入してください。
+      ```bash
+      sudo apt install ffmpeg
+      rm -r ./server/thirdparty/FFmpeg/
+      ./server/prepare-and-start.sh
+      ```
+    - Linux では `./prepare-and-start.sh install` のように install 引数を指定することで PM2 によるデーモン化ができます。
+      - delete 引数で解除します。
+      - root プロセスのデーモン化ではないため、起動時に PM2 自体をスタートアップするための `pm2 startup` も必要になると思います。
+    - 今のところ Akebi リバースプロキシのダウンロードを省略しているので、必要な場合は個別に導入してください。
+      - Akebi リバースプロキシを使わない場合、今のところ Twitter やニコニコ実況のログインを要する機能 (コメント投稿など) は使えません。
+    - 起動後は http://localhost:7000/ でアクセスできます。
+  - Windows では通知領域にアイコンを表示できます。
+    - コンソール画面を非表示にしたいときは "server/KonomiTV-NoConsole.pyw" を "server/thirdparty/Python/pythonw.exe" で開いてください。
+- 字幕のフォントが既定で「Windows TV 丸ゴシック」になっていますが、最近の Windows には搭載されていないと思うので変更をお勧めします。
+
+このフォークについての注意終わり。
+
 # <img width="350" src="https://user-images.githubusercontent.com/39271166/134050201-8110f076-a939-4b62-8c86-7beaa3d4728c.png" alt="KonomiTV Logo">　<!-- omit in toc -->
 
 <img width="100%" src="https://github.com/user-attachments/assets/6971f354-0418-4305-bf6d-b061142ffec6">
