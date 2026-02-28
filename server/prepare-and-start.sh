@@ -5,7 +5,7 @@ if [ "$1" = install ]; then
     echo 'Installing KonomiTV using pm2 run as the current user...'
     echo 'Use `pm2 {stop|restart} KonomiTV` to temporarily stop or restart.'
     echo
-    cd "`dirname $0`" && pm2 start ./thirdparty/Python/bin/python --name KonomiTV -- -m pipenv run python KonomiTV.py && pm2 save
+    cd "`dirname $0`" && pm2 start ./thirdparty/Python/bin/python --name KonomiTV -- -m poetry run python KonomiTV.py && pm2 save
     exit
 elif [ "$1" = delete ]; then
     echo 'Deleting KonomiTV from pm2 process list...'
